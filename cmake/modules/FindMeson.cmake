@@ -1,0 +1,7 @@
+function(find_meson meson_exe)
+  find_program(MESON_EXECUTABLE meson)
+  if(NOT MESON_EXECUTABLE)
+    message(FATAL_ERROR "Can't find meson")
+  endif()
+  set(${meson_exe} "${MESON_EXECUTABLE}" PARENT_SCOPE)
+endfunction()
