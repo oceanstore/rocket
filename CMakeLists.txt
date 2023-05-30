@@ -9,25 +9,44 @@ project(rocket
         LANGUAGES C CXX
 )
 
-message("${CMAKE_SOURCE_DIR}")
-
 set(BUILD_SUPPORT_DIR "${CMAKE_SOURCE_DIR}/build_support")
-
 set(THIRD_PARTY_DIR "${CMAKE_SOURCE_DIR}/third_party")
 
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_PATH}:${CMAKE_MODULE_PATH}")
-
 LIST(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_PREFIX}")
-
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake/modules)
-
-include(${CMAKE_SOURCE_DIR}/cmake/modules/BuildSPDK.cmake)
-
+set(CMAKE_MODULE_PATH  ${BUILD_SUPPORT_DIR}/cmake/modules)
+include(${CMAKE_MODULE_PATH}/BuildSPDK.cmake)
 build_spdk()
 
 # #####################################################################################################################
 # ANALYSIS SETUP
 # #####################################################################################################################
+
+# clang-dity
+find_program(CLANG_TIDY_BIN
+        NAMES clang-tidy clang-tidy-14
+        HINTS ${BUSTUB_CLANG_SEARCH_PATH})
+
+if("${CLANG_TIDY_BIN}" STREQUAL "CLANG_TIDY_BIN-NOTFOUND")
+        message(WARNING "couldn't find clang-tidy.")
+else()
+        # Output compile_commands.json
+        set(CMAKE_EXPORT_COMPILE_COMMANDS 1)
+        message(STATUS "found clang-tidy at ${CLANG_TIDY_BIN}")
+endif()
+
+find_program(CLANG_APPLY_REPLACEMENTS_BIN
+        NAMES clang-apply-replacements clang-apply-replacements-14
+        HINTS ${BUSTUB_CLANG_SEARCH_PATH})
+
+if("${CLANG_APPLY_REPLACEMENTS_BIN}" STREQUAL "CLANG_APPLY_REPLACEMENTS_BIN-NOTFOUND")
+        message(WARNING "couldn't find clang-apply-replacements.")
+else()
+        # Output compile_commands.json
+        set(CMAKE_EXPORT_COMPILE_COMMANDS 1)
+        message(STATUS "found clang-apply-replacements at ${CLANG_APPLY_REPLACEMENTS_BIN}")
+endif()
+
 # sanitizer
 if(NOT DEFINED SANITIZER)
   set(SANITIZER address)
@@ -97,7 +116,6 @@ message(STATUS "CMAKE_CXX_FLAGS: ${CMAKE_CXX_FLAGS}")
 message(STATUS "CMAKE_CXX_FLAGS_DEBUG: ${CMAKE_CXX_FLAGS_DEBUG}")
 message(STATUS "CMAKE_EXE_LINKER_FLAGS: ${CMAKE_EXE_LINKER_FLAGS}")
 message(STATUS "CMAKE_SHARED_LINKER_FLAGS: ${CMAKE_SHARED_LINKER_FLAGS}")
-
 
 # Includes.
 set(ROCKET_SRC_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/src/include)
